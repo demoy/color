@@ -193,25 +193,25 @@ def finish(board):
 
 
 
-def minimax(board,currentplayer,initialplayer,depth,roots,top=False):
+def minimax(board,currentplayer,initialplayer,depth,top=False):
     global move
     if depth==0 or finish(board):
         return 0
     
     if currentplayer==initialplayer:
         bestValue=-x*y
-        for letter in unused(roots):
+        for letter in unused(board, roots):
             newboard= copy.deepcopy(board)
-            val = move(newboard,letter,roots[player/totalplayers]) + minimax(newboard,player+1,me,depth-1,roots)
+            val = play(newboard,roots[currentplayer].a,roots[currentplayer].b,letter) + minimax(newboard,turn(currentplayer),initialplayer,depth-1)
             if top:
                 move=letter
             bestValue=max(bestValue,val)
         return bestValue
     else:
         bestValue=x*y
-        for letter in unused(roots):
+        for letter in unused(board, roots):
             newboard= copy.deepcopy(board)
-            val = move(newboard,letter,roots[player/totalplayers]) + minimax(newboard,player+1,me,depth-1,roots)
+            val = play(newboard,roots[currentplayer].a,roots[currentplayer].b,letter) + minimax(newboard,turn(currentplayer),initialplayer,depth-1)
             bestValue=min(bestValue,val)
         return bestValue
         
@@ -247,7 +247,7 @@ def read(setup=False):
     
     if not setup:
         _print("\nEnter a Letter\n")
-        while(not move in unused(roots)):
+        while(not move in unused(board,roots)):
             move =  getch()
             if move == chr(27):
                 raise Exception("ESC pressed.- crash exiting") 
@@ -291,7 +291,7 @@ def turn(player):
     return (player+1)%size
 
 def play(board,a,b,move):
-    board[a][b].setLeter(move)
+    board[a][b].setLetter(move)
     return switchLetters(board,roots[player].a,roots[player].b)
     
 def main(console=True):
@@ -305,7 +305,7 @@ def main(console=True):
         score()
         drawboard()
         if player == 0: read()
-        else: minimax(board,player, player,8,roots,True)
+        else: minimax(board,player, player,8,True)
         roots[player].tally(play(board,roots[player].a,roots[player].b,move))
         #roots[player].tile.setLetter(move)
         #roots[player].tally(switchLetters(board,roots[player].a,roots[player].b))
