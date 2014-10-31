@@ -203,9 +203,11 @@ def minimax(board,currentplayer,initialplayer,depth,top=False):
         for letter in unused(board, roots):
             newboard= copy.deepcopy(board)
             val = play(newboard,roots[currentplayer].a,roots[currentplayer].b,letter) + minimax(newboard,turn(currentplayer),initialplayer,depth-1)
-            if top:
-                move=letter
+
             bestValue=max(bestValue,val)
+            if val==bestValue and top:
+                move=letter
+            
         return bestValue
     else:
         bestValue=x*y
@@ -229,6 +231,7 @@ def drawboard():
             else: _print(y.letter)
 
 def score():
+    clearscreen()
     for root in roots:
         _print("Player ")
         _print(board[root.a][root.b].player)
@@ -297,18 +300,14 @@ def play(board,a,b,move):
 def main(console=True):
     global player
     
-    clearscreen()
     read(console)
     makeboard()
     while(not finish(board)):
-        clearscreen()
         score()
         drawboard()
-        if player == 0: read()
+        if player == 1: read()
         else: minimax(board,player, player,8,True)
         roots[player].tally(play(board,roots[player].a,roots[player].b,move))
-        #roots[player].tile.setLetter(move)
-        #roots[player].tally(switchLetters(board,roots[player].a,roots[player].b))
         player= turn(player)
     #_print final scores and draw final board    
         
