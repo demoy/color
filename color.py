@@ -60,20 +60,19 @@ def _print(item):
 
 
 class root:
-    tile=None
     score=0
     a=None
     b=None
     
     def __init__(this,player,a,b):
-        this.tile=board[a][b]
-        this.tile.player=player
-        this.tile.letter=player
+        board[a][b]
+        board[a][b].player=player
+        board[a][b].letter=player
         this.a=a
         this.b=b
 
     def tally(this,num):
-        score+=num
+        this.score+=num
     
 class tile:
     player=-1;
@@ -102,10 +101,10 @@ class tile:
         return 0
 
 
-def unused(roots):       
+def unused(board,roots):       
     def inuse(letter,roots):
         for root in roots:
-            if(root.tile.letter==letter):
+            if(board[root.a][root.b].letter==letter):
                 return []
         return letter
                       
@@ -180,7 +179,7 @@ def startingPoints():
         return
     
     if(size==4):
-        roots+=[root(1,x/2,0), root(2,x-1,y/2), root(3,x/2,y-1), root(4,x,y/2)]
+        roots+=[root(1,x/2,0), root(2,x-1,y/2), root(3,x/2,y-1), root(4,0,y/2)]
         return
     
 
@@ -194,15 +193,14 @@ def finish(board):
 
 
 
-def minimax(board,player, me ,depth,roots,top=False):
+def minimax(board,currentplayer,initialplayer,depth,roots,top=False):
     global move
     if depth==0 or finish(board):
         return 0
     
-    usuable=letterSet(board)
-    if player%me==me:
+    if currentplayer==initialplayer:
         bestValue=-x*y
-        for letter in usuable:
+        for letter in unused(roots):
             newboard= copy.deepcopy(board)
             val = move(newboard,letter,roots[player/totalplayers]) + minimax(newboard,player+1,me,depth-1,roots)
             if top:
@@ -211,7 +209,7 @@ def minimax(board,player, me ,depth,roots,top=False):
         return bestValue
     else:
         bestValue=x*y
-        for letter in usuable:
+        for letter in unused(roots):
             newboard= copy.deepcopy(board)
             val = move(newboard,letter,roots[player/totalplayers]) + minimax(newboard,player+1,me,depth-1,roots)
             bestValue=min(bestValue,val)
@@ -233,7 +231,7 @@ def drawboard():
 def score():
     for root in roots:
         _print("Player ")
-        _print(root.tile.player)
+        _print(board[root.a][root.b].player)
         _print(" Score is ")
         _print(root.score)
         print
@@ -288,9 +286,19 @@ def read(setup=False):
             except ValueError:
                 print "Error: Please enter a number"
         
-def main():
+def turn(player):
+    global size
+    return (player+1)%size
+
+def play(board,a,b,move):
+    board[a][b].setLeter(move)
+    return switchLetters(board,roots[player].a,roots[player].b)
+    
+def main(console=True):
+    global player
+    
     clearscreen()
-    read(True)
+    read(console)
     makeboard()
     while(not finish(board)):
         clearscreen()
@@ -298,13 +306,16 @@ def main():
         drawboard()
         if player == 0: read()
         else: minimax(board,player, player,8,roots,True)
-        
-        roots[player].tile.setLetter(move)
-        roots[player].score=switchLetters(board,roots[player].a,roots[player].b)
-    
+        roots[player].tally(play(board,roots[player].a,roots[player].b,move))
+        #roots[player].tile.setLetter(move)
+        #roots[player].tally(switchLetters(board,roots[player].a,roots[player].b))
+        player= turn(player)
     #_print final scores and draw final board    
         
             
+def config():
+    #added to set up variable from gui safely
+    pass
 
 if __name__ == "__main__":
     main()
