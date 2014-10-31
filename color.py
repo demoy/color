@@ -1,5 +1,7 @@
 import os
 import copy
+import sys, pygame
+
 from random import choice
 
 x=0
@@ -11,6 +13,11 @@ letters=[]
 current=0
 move=None
 board=[]
+
+size = width, height = 320, 240
+speed = [2, 2]
+screen = pygame.display.set_mode(size)
+
 
 # _Getch class taken from "http://code.activestate.com/recipes/134892/"
 class Getch:
@@ -101,17 +108,9 @@ class tile:
         return 0
 
 
-def unused(board,roots):       
-    def inuse(letter,roots):
-        for root in roots:
-            if(board[root.a][root.b].letter==letter):
-                return []
-        return letter
-                      
-    unused=[]
-    for letter in letters:
-        unused+=inuse(letter,roots)
-    return unused
+def unused(board,roots):
+    inused = [ board[root.a][root.b].letter for root in roots if board[root.a][root.b].letter in letters]
+    return list(set(letters) - set(inused))
 
 
 def makeboard():
