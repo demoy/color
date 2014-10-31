@@ -1,5 +1,6 @@
 import os
 import copy
+
 from random import choice
 
 x=0
@@ -10,6 +11,7 @@ roots=[]
 letters=[]
 move=None
 board=[]
+
 
 # _Getch class taken from "http://code.activestate.com/recipes/134892/"
 class Getch:
@@ -100,17 +102,9 @@ class tile:
         return 0
 
 
-def unused(board):       
-    def inuse(letter):
-        for root in roots:
-            if(board[root.a][root.b].letter==letter):
-                return []
-        return letter
-                      
-    unused=[]
-    for letter in letters:
-        unused+=inuse(letter)
-    return unused
+def unused(board):
+    inused = [ board[root.a][root.b].letter for root in roots if board[root.a][root.b].letter in letters]
+    return list(set(letters) - set(inused))
 
 
 def makeboard():
