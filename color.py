@@ -1,5 +1,6 @@
 import os
 import copy
+from itertools import repeat
 
 from random import choice
 
@@ -66,7 +67,6 @@ class root:
     b=None
     
     def __init__(this,player,a,b):
-        board[a][b]
         board[a][b].player=player
         board[a][b].letter=player
         this.a=a
@@ -109,13 +109,9 @@ def unused(board):
 
 def makeboard():
     global board
-    board = [[] for i in range(x)]
-    for entry in board:
-        entry.extend([tile() for i in range(y)])
-    for column in board:
-        for index in column:
-            index=tile()
-            
+
+    board = [[tile() for i in repeat(None,y)] for i in repeat(None,x)]
+
     startingPoints()
 
 def switchLetters(board, a, b):
@@ -188,30 +184,32 @@ def finish(board):
                 
 
 
-
-def minimax(board,currentplayer,initialplayer,depth,top=False):
+def minimax(board,currentplayer,initialplayer,depth,alpha,beta,top=False):
     global move
     if depth==0 or finish(board):
         return 0
     
     if currentplayer==initialplayer:
-        bestValue=-x*y
         for letter in unused(board):
             newboard= copy.deepcopy(board)
-            val = play(newboard,roots[currentplayer].a,roots[currentplayer].b,letter) + minimax(newboard,turn(currentplayer),initialplayer,depth-1)
-
-            bestValue=max(bestValue,val)
-            if val==bestValue and top:
+            val = play(newboard,roots[currentplayer].a,roots[currentplayer].b,letter) \
+            + minimax(newboard,turn(currentplayer),initialplayer,depth-1,alpha,beta)
+            alpha=max(alpha,val)
+            if beta<=alpha:
+                break
+            if val==alpha and top:
                 move=letter
             
-        return bestValue
+        return alpha
     else:
-        bestValue=x*y
         for letter in unused(board):
             newboard= copy.deepcopy(board)
-            val = play(newboard,roots[currentplayer].a,roots[currentplayer].b,letter) + minimax(newboard,turn(currentplayer),initialplayer,depth-1)
-            bestValue=min(bestValue,val)
-        return bestValue
+            val = play(newboard,roots[currentplayer].a,roots[currentplayer].b,letter) \
+            + minimax(newboard,turn(currentplayer),initialplayer,depth-1,alpha,beta)
+            beta=min(beta,val)
+            if beta<=alpha:
+                break
+        return beta
         
 # clearScreen taken from "http://stackoverflow.com/questions/517970/how-to-clear-python-interpreter-console"
 def clearscreen():
@@ -258,9 +256,10 @@ def read(setup=False):
         except AttributeError:
             _print(board[roots[player].a][roots[player].b].letter)
         _print("\nEnter a Letter in set:")
-        _print(unused(board))
+        temp=unused(board)
+        _print(temp)
         print
-        while(not move in unused(board)):
+        while(not move in temp):
             move =  getch()
             if move == chr(3) or move == chr(4):
                 raise Exception("I Know Python - BYE!") 
@@ -316,11 +315,11 @@ def main(console=True):
         score()
         
         if player == 1: read()
-        else: minimax(board,player, player,8,True)
+        else: minimax(board,player, player,8,-x*y , x*y,True)
+
         roots[player].tally(play(board,roots[player].a,roots[player].b,move))
         player= turn(player)
     score()
-    
         
             
 def config():
